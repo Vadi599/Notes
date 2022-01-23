@@ -39,7 +39,7 @@ class AppModule {
     ) = Room.databaseBuilder(
         context,
         NoteDatabase::class.java, "database-note.db"
-    ).createFromAsset("database-note.db")
+    ).createFromAsset("database-note.db").allowMainThreadQueries()
         .build()
 
     @Module

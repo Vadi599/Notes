@@ -34,7 +34,7 @@ class RootActivity : AppCompatActivity(), FragmentNavigator {
             .replace(
                 viewBinding.container.id,
                 fragment
-            )
+            ).addToBackStack(null)
             .commit()
     }
 
@@ -43,6 +43,7 @@ class RootActivity : AppCompatActivity(), FragmentNavigator {
             supportFragmentManager.popBackStack()
         } else {
             super.onBackPressed()
+            finish()
         }
     }
 

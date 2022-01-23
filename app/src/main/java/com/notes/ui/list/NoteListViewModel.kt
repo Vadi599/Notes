@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notes.data.NoteDatabase
+import com.notes.data.NoteDbo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,6 +21,14 @@ class NoteListViewModel @Inject constructor(
     val navigateToNoteCreation: LiveData<Unit?> = _navigateToNoteCreation
 
     init {
+        getAllNotes()
+    }
+
+    fun onCreateNoteClick() {
+        _navigateToNoteCreation.postValue(Unit)
+    }
+
+    private fun getAllNotes() {
         viewModelScope.launch(Dispatchers.IO) {
             _notes.postValue(
                 noteDatabase.noteDao().getAll().map {
@@ -33,14 +42,24 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
-    fun onCreateNoteClick() {
-        _navigateToNoteCreation.postValue(Unit)
+    fun insertNote(noteDbo: NoteDbo) {
+        noteDatabase.noteDao().insertAll(noteDbo)
+        getAllNotes()
     }
 
+    fun deleteNote(id: Long) {
+        noteDatabase.noteDao().deleteNote(id)
+        getAllNotes()
+    }
+
+    fun editNote(noteDbo: NoteDbo) {
+        noteDatabase.noteDao().updateEmployee(noteDbo)
+        getAllNotes()
+    }
 }
 
 data class NoteListItem(
     val id: Long,
-    val title: String,
-    val content: String,
+    var title: String,
+    var content: String
 )

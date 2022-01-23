@@ -1,30 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    >
+    android:paddingBottom="15dp">
 
     <TextView
         android:id="@+id/titleLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
         android:textAppearance="@android:style/TextAppearance.Material.Title"
-        tools:text="Title"
-        />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Title" />
+
+    <ImageButton
+        android:id="@+id/iv_delete_note"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_delete_note"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/contentLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="10dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:textAppearance="@android:style/TextAppearance.Material.Body1"
-        tools:text="Content"
-        />
+        app:layout_constraintTop_toBottomOf="@id/iv_delete_note"
+        tools:text="Content" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

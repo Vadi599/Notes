@@ -3,16 +3,21 @@ package com.notes.ui.list
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.notes.databinding.FragmentNoteListBinding
-import com.notes.databinding.ListItemNoteBinding
+import com.notes.R
+import com.notes.data.NoteDbo
+import com.notes.databinding.*
 import com.notes.di.DependencyManager
 import com.notes.ui._base.FragmentNavigator
 import com.notes.ui._base.ViewBindingFragment
 import com.notes.ui._base.findImplementationOrThrow
 import com.notes.ui.details.NoteDetailsFragment
+import java.time.LocalDateTime
 
 class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
     FragmentNoteListBinding::inflate
@@ -20,7 +25,13 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
 
     private val viewModel by lazy { DependencyManager.noteListViewModel() }
 
-    private val recyclerViewAdapter = RecyclerViewAdapter()
+    private val itemsDbo = mutableListOf<NoteDbo>()
+
+    private val recyclerViewAdapter = RecyclerViewAdapter(
+        this::onDeleteClick,
+        this::onLongClick,
+        this::onNoteClick
+    )
 
     override fun onViewBindingCreated(
         viewBinding: FragmentNoteListBinding,
@@ -35,6 +46,7 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
                 LinearLayout.VERTICAL
             )
         )
+        itemsDbo.sortBy { it.createdAt }
         viewBinding.createNoteButton.setOnClickListener {
             viewModel.onCreateNoteClick()
         }
@@ -42,24 +54,117 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
         viewModel.notes.observe(
             viewLifecycleOwner,
             {
-                if (it != null) {
+                if (it?.size != 0) {
+                    viewBinding.viewFlipper.displayedChild = 0
                     recyclerViewAdapter.setItems(it)
+                } else {
+                    viewBinding.viewFlipper.displayedChild = 1
                 }
             }
         )
         viewModel.navigateToNoteCreation.observe(
             viewLifecycleOwner,
             {
-                findImplementationOrThrow<FragmentNavigator>()
-                    .navigateTo(
-                        NoteDetailsFragment()
-                    )
-
+                onCreateNoteDialog()
             }
         )
     }
 
-    private class RecyclerViewAdapter : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+    private fun onNoteClick(note: NoteListItem) {
+        findImplementationOrThrow<FragmentNavigator>().navigateTo(NoteDetailsFragment())
+    }
+
+    private fun onDeleteClick(note: NoteListItem) {
+        onDeleteNoteDialog(note)
+    }
+
+    private fun onLongClick(note: NoteListItem) {
+        onEditNoteDialog(note)
+    }
+
+    private fun onEditNoteDialog(note: NoteListItem) {
+        val customDialogEditEmployeeBinding: CustomDialogEditNoteBinding =
+            CustomDialogEditNoteBinding.inflate(
+                layoutInflater
+            )
+        customDialogEditEmployeeBinding.tvTitle.setText(R.string.note_editing)
+        customDialogEditEmployeeBinding.tvNewNoteTitle.setText(R.string.note_title)
+        customDialogEditEmployeeBinding.etNewNoteTitle.setText(note.title)
+        customDialogEditEmployeeBinding.tvNoteContent.setText(R.string.note_content)
+        customDialogEditEmployeeBinding.etNewNoteContent.setText(note.content)
+        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+            .setView(customDialogEditEmployeeBinding.root)
+            .create()
+        customDialogEditEmployeeBinding.btnEditCancel.setOnClickListener { customAlertBuilder.dismiss() }
+        customDialogEditEmployeeBinding.btnEditOk.setOnClickListener {
+            val newNoteTitle: String =
+                customDialogEditEmployeeBinding.etNewNoteTitle.text.toString()
+            val newNoteContent: String =
+                customDialogEditEmployeeBinding.etNewNoteContent.text.toString()
+            note.title = newNoteTitle
+            note.content = newNoteContent
+            //  viewModel.editNote(note)
+            customAlertBuilder.dismiss()
+        }
+        customAlertBuilder.show()
+    }
+
+
+    private fun onDeleteNoteDialog(note: NoteListItem) {
+        val customDialogDeleteFromOurCompanyBinding: CustomDialogDeleteNoteBinding =
+            CustomDialogDeleteNoteBinding.inflate(
+                layoutInflater
+            )
+        customDialogDeleteFromOurCompanyBinding.tvNoteTitle.setText(R.string.delete_note_title)
+        customDialogDeleteFromOurCompanyBinding.tvNoteDescription.setText(R.string.delete_note_description)
+        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+            .setView(customDialogDeleteFromOurCompanyBinding.root)
+            .create()
+        customDialogDeleteFromOurCompanyBinding.btnDeleteCancel.setOnClickListener { customAlertBuilder.dismiss() }
+        customDialogDeleteFromOurCompanyBinding.btnDeleteOk.setOnClickListener {
+            note.id.let { it1 -> viewModel.deleteNote(it1) }
+            customAlertBuilder.dismiss()
+        }
+        customAlertBuilder.show()
+    }
+
+    private fun onCreateNoteDialog() {
+        val customDialogAddNoteBinding: CustomDialogAddNoteBinding =
+            CustomDialogAddNoteBinding.inflate(
+                layoutInflater
+            )
+        customDialogAddNoteBinding.tvAddingNote.setText(R.string.adding_a_note)
+        customDialogAddNoteBinding.tvNoteTitle.setText(R.string.note_title)
+        customDialogAddNoteBinding.tvNoteContent.setText(R.string.note_content)
+        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+            .setView(customDialogAddNoteBinding.root)
+            .create()
+        customDialogAddNoteBinding.btnCancel.setOnClickListener { customAlertBuilder.dismiss() }
+        customDialogAddNoteBinding.btnOk.setOnClickListener {
+            val noteName: String = customDialogAddNoteBinding.etNoteTitle.text.toString()
+            val noteContent: String = customDialogAddNoteBinding.etNoteContent.text.toString()
+            if (noteName.isEmpty() || noteContent.isEmpty()) {
+                showMessage("Enter data for all fields!")
+            } else {
+                val note =
+                    NoteDbo(0, noteName, noteContent, LocalDateTime.now(), LocalDateTime.now())
+                viewModel.insertNote(note)
+                customAlertBuilder.dismiss()
+            }
+        }
+        customAlertBuilder.show()
+    }
+
+    private fun showMessage(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private class RecyclerViewAdapter(
+        private val onDeleteClick: (NoteListItem) -> Unit,
+        private val onLongClick: (NoteListItem) -> Unit,
+        private val onNoteClick: (NoteListItem) -> Unit
+    ) :
+        RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
         private val items = mutableListOf<NoteListItem>()
 
@@ -79,15 +184,28 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
             position: Int
         ) {
             holder.bind(items[position])
+            val note = items[position]
+            holder.btnDelete.setOnClickListener {
+                onDeleteClick.invoke(note)
+            }
+            holder.itemView.setOnLongClickListener {
+                onLongClick.invoke(note)
+                true
+            }
+            holder.itemView.setOnClickListener {
+                onNoteClick.invoke(note)
+            }
         }
 
         override fun getItemCount() = items.size
 
         fun setItems(
-            items: List<NoteListItem>
+            items: List<NoteListItem>?
         ) {
             this.items.clear()
-            this.items.addAll(items)
+            if (items != null) {
+                this.items.addAll(items)
+            }
             notifyDataSetChanged()
         }
 
@@ -96,7 +214,7 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
         ) : RecyclerView.ViewHolder(
             binding.root
         ) {
-
+            val btnDelete: ImageButton = binding.ivDeleteNote
             fun bind(
                 note: NoteListItem
             ) {
