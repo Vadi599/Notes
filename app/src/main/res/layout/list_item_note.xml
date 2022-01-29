@@ -8,12 +8,17 @@
 
     <TextView
         android:id="@+id/titleLabel"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:textAppearance="@android:style/TextAppearance.Material.Title"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_delete_note"
+        app:layout_constraintStart_toStartOf="parent"
         tools:text="Title" />
 
     <ImageButton

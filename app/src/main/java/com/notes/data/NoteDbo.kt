@@ -11,9 +11,9 @@ data class NoteDbo(
     @ColumnInfo(name = "id")
     val id: Long = 0,
     @ColumnInfo(name = "title")
-    var title: String,
+    val title: String,
     @ColumnInfo(name = "content")
-    var content: String,
+    val content: String,
     @ColumnInfo(name = "createdAt")
     val createdAt: LocalDateTime,
     @ColumnInfo(name = "modifiedAt")

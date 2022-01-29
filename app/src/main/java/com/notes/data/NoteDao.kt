@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.notes.ui.list.NoteListItem
 
 @Dao
 interface NoteDao {
@@ -15,9 +16,9 @@ interface NoteDao {
     fun insertAll(vararg notes: NoteDbo)
 
     @Query("DELETE FROM notes WHERE id=:noteId")
-    fun deleteNote(noteId: Long?)
+    fun deleteNote(noteId: Long)
 
-    @Update
-    fun updateEmployee(note: NoteDbo)
+    @Update(entity = NoteDbo::class)
+    fun updateNote(note: NoteListItem)
 
 }

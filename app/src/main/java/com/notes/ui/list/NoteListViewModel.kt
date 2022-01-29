@@ -17,15 +17,8 @@ class NoteListViewModel @Inject constructor(
     private val _notes = MutableLiveData<List<NoteListItem>?>()
     val notes: LiveData<List<NoteListItem>?> = _notes
 
-    private val _navigateToNoteCreation = MutableLiveData<Unit?>()
-    val navigateToNoteCreation: LiveData<Unit?> = _navigateToNoteCreation
-
     init {
         getAllNotes()
-    }
-
-    fun onCreateNoteClick() {
-        _navigateToNoteCreation.postValue(Unit)
     }
 
     private fun getAllNotes() {
@@ -42,19 +35,25 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
-    fun insertNote(noteDbo: NoteDbo) {
-        noteDatabase.noteDao().insertAll(noteDbo)
-        getAllNotes()
+    fun insertNote(note: NoteDbo) {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDatabase.noteDao().insertAll(note)
+            getAllNotes()
+        }
     }
 
     fun deleteNote(id: Long) {
-        noteDatabase.noteDao().deleteNote(id)
-        getAllNotes()
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDatabase.noteDao().deleteNote(id)
+            getAllNotes()
+        }
     }
 
-    fun editNote(noteDbo: NoteDbo) {
-        noteDatabase.noteDao().updateEmployee(noteDbo)
-        getAllNotes()
+    fun editNote(note: NoteListItem) {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDatabase.noteDao().updateNote(note)
+            getAllNotes()
+        }
     }
 }
 

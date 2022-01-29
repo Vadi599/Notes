@@ -1,5 +1,6 @@
 package com.notes.ui.list
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -25,8 +26,6 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
 
     private val viewModel by lazy { DependencyManager.noteListViewModel() }
 
-    private val itemsDbo = mutableListOf<NoteDbo>()
-
     private val recyclerViewAdapter = RecyclerViewAdapter(
         this::onDeleteClick,
         this::onLongClick,
@@ -46,28 +45,21 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
                 LinearLayout.VERTICAL
             )
         )
-        itemsDbo.sortBy { it.createdAt }
+
         viewBinding.createNoteButton.setOnClickListener {
-            viewModel.onCreateNoteClick()
+            onCreateNoteDialog()
         }
 
         viewModel.notes.observe(
-            viewLifecycleOwner,
-            {
-                if (it?.size != 0) {
-                    viewBinding.viewFlipper.displayedChild = 0
-                    recyclerViewAdapter.setItems(it)
-                } else {
-                    viewBinding.viewFlipper.displayedChild = 1
-                }
+            viewLifecycleOwner
+        ) {
+            if (it?.size != 0) {
+                viewBinding.viewFlipper.displayedChild = 0
+                recyclerViewAdapter.setItems(it)
+            } else {
+                viewBinding.viewFlipper.displayedChild = 1
             }
-        )
-        viewModel.navigateToNoteCreation.observe(
-            viewLifecycleOwner,
-            {
-                onCreateNoteDialog()
-            }
-        )
+        }
     }
 
     private fun onNoteClick(note: NoteListItem) {
@@ -83,7 +75,7 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
     }
 
     private fun onEditNoteDialog(note: NoteListItem) {
-        val customDialogEditEmployeeBinding: CustomDialogEditNoteBinding =
+        val customDialogEditEmployeeBinding =
             CustomDialogEditNoteBinding.inflate(
                 layoutInflater
             )
@@ -92,32 +84,38 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
         customDialogEditEmployeeBinding.etNewNoteTitle.setText(note.title)
         customDialogEditEmployeeBinding.tvNoteContent.setText(R.string.note_content)
         customDialogEditEmployeeBinding.etNewNoteContent.setText(note.content)
-        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+        val customAlertBuilder = AlertDialog.Builder(requireContext())
             .setView(customDialogEditEmployeeBinding.root)
             .create()
         customDialogEditEmployeeBinding.btnEditCancel.setOnClickListener { customAlertBuilder.dismiss() }
         customDialogEditEmployeeBinding.btnEditOk.setOnClickListener {
-            val newNoteTitle: String =
-                customDialogEditEmployeeBinding.etNewNoteTitle.text.toString()
-            val newNoteContent: String =
-                customDialogEditEmployeeBinding.etNewNoteContent.text.toString()
-            note.title = newNoteTitle
-            note.content = newNoteContent
-            //  viewModel.editNote(note)
-            customAlertBuilder.dismiss()
+            val newNoteTitle =
+                customDialogEditEmployeeBinding.etNewNoteTitle.text.toString().trim()
+            val newNoteContent =
+                customDialogEditEmployeeBinding.etNewNoteContent.text.toString().trim()
+            if ((newNoteTitle.isEmpty() || newNoteContent.isEmpty()) ||
+                (newNoteTitle.matches(Regex("")) || newNoteContent.matches(Regex("")))
+            ) {
+                showMessage("Enter data for all fields!")
+            } else {
+                note.title = newNoteTitle
+                note.content = newNoteContent
+                viewModel.editNote(note)
+                customAlertBuilder.dismiss()
+            }
         }
         customAlertBuilder.show()
     }
 
 
     private fun onDeleteNoteDialog(note: NoteListItem) {
-        val customDialogDeleteFromOurCompanyBinding: CustomDialogDeleteNoteBinding =
+        val customDialogDeleteFromOurCompanyBinding =
             CustomDialogDeleteNoteBinding.inflate(
                 layoutInflater
             )
         customDialogDeleteFromOurCompanyBinding.tvNoteTitle.setText(R.string.delete_note_title)
         customDialogDeleteFromOurCompanyBinding.tvNoteDescription.setText(R.string.delete_note_description)
-        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+        val customAlertBuilder = AlertDialog.Builder(requireContext())
             .setView(customDialogDeleteFromOurCompanyBinding.root)
             .create()
         customDialogDeleteFromOurCompanyBinding.btnDeleteCancel.setOnClickListener { customAlertBuilder.dismiss() }
@@ -129,21 +127,25 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
     }
 
     private fun onCreateNoteDialog() {
-        val customDialogAddNoteBinding: CustomDialogAddNoteBinding =
+        val customDialogAddNoteBinding =
             CustomDialogAddNoteBinding.inflate(
                 layoutInflater
             )
         customDialogAddNoteBinding.tvAddingNote.setText(R.string.adding_a_note)
         customDialogAddNoteBinding.tvNoteTitle.setText(R.string.note_title)
         customDialogAddNoteBinding.tvNoteContent.setText(R.string.note_content)
-        val customAlertBuilder: AlertDialog = AlertDialog.Builder(requireContext())
+        val customAlertBuilder = AlertDialog.Builder(requireContext())
             .setView(customDialogAddNoteBinding.root)
             .create()
         customDialogAddNoteBinding.btnCancel.setOnClickListener { customAlertBuilder.dismiss() }
         customDialogAddNoteBinding.btnOk.setOnClickListener {
-            val noteName: String = customDialogAddNoteBinding.etNoteTitle.text.toString()
-            val noteContent: String = customDialogAddNoteBinding.etNoteContent.text.toString()
-            if (noteName.isEmpty() || noteContent.isEmpty()) {
+            val noteName =
+                customDialogAddNoteBinding.etNoteTitle.text.toString().trim()
+            val noteContent =
+                customDialogAddNoteBinding.etNoteContent.text.toString().trim()
+            if ((noteName.isEmpty() || noteContent.isEmpty()) ||
+                (noteName.matches(Regex("")) || noteContent.matches(Regex("")))
+            ) {
                 showMessage("Enter data for all fields!")
             } else {
                 val note =
@@ -199,6 +201,7 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
 
         override fun getItemCount() = items.size
 
+        @SuppressLint("NotifyDataSetChanged")
         fun setItems(
             items: List<NoteListItem>?
         ) {

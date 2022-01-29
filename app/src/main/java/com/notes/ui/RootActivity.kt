@@ -43,7 +43,6 @@ class RootActivity : AppCompatActivity(), FragmentNavigator {
             supportFragmentManager.popBackStack()
         } else {
             super.onBackPressed()
-            finish()
         }
     }
 
