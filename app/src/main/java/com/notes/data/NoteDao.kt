@@ -21,4 +21,7 @@ interface NoteDao {
     @Update(entity = NoteDbo::class)
     fun updateNote(note: NoteListItem)
 
+    @Query("SELECT * FROM notes WHERE id=:noteId")
+    fun findNoteById(noteId: Long): NoteListItem
+
 }

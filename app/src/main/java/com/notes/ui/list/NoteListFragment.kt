@@ -63,7 +63,11 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
     }
 
     private fun onNoteClick(note: NoteListItem) {
-        findImplementationOrThrow<FragmentNavigator>().navigateTo(NoteDetailsFragment())
+        val bundle = Bundle()
+        bundle.putLong("noteId", note.id)
+        val fragment = NoteDetailsFragment()
+        fragment.arguments = bundle
+        findImplementationOrThrow<FragmentNavigator>().navigateTo(fragment)
     }
 
     private fun onDeleteClick(note: NoteListItem) {
@@ -75,24 +79,24 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
     }
 
     private fun onEditNoteDialog(note: NoteListItem) {
-        val customDialogEditEmployeeBinding =
+        val customDialogEditNoteBinding =
             CustomDialogEditNoteBinding.inflate(
                 layoutInflater
             )
-        customDialogEditEmployeeBinding.tvTitle.setText(R.string.note_editing)
-        customDialogEditEmployeeBinding.tvNewNoteTitle.setText(R.string.note_title)
-        customDialogEditEmployeeBinding.etNewNoteTitle.setText(note.title)
-        customDialogEditEmployeeBinding.tvNoteContent.setText(R.string.note_content)
-        customDialogEditEmployeeBinding.etNewNoteContent.setText(note.content)
+        customDialogEditNoteBinding.tvTitle.setText(R.string.note_editing)
+        customDialogEditNoteBinding.tvNewNoteTitle.setText(R.string.note_title)
+        customDialogEditNoteBinding.etNewNoteTitle.setText(note.title)
+        customDialogEditNoteBinding.tvNoteContent.setText(R.string.note_content)
+        customDialogEditNoteBinding.etNewNoteContent.setText(note.content)
         val customAlertBuilder = AlertDialog.Builder(requireContext())
-            .setView(customDialogEditEmployeeBinding.root)
+            .setView(customDialogEditNoteBinding.root)
             .create()
-        customDialogEditEmployeeBinding.btnEditCancel.setOnClickListener { customAlertBuilder.dismiss() }
-        customDialogEditEmployeeBinding.btnEditOk.setOnClickListener {
+        customDialogEditNoteBinding.btnEditCancel.setOnClickListener { customAlertBuilder.dismiss() }
+        customDialogEditNoteBinding.btnEditOk.setOnClickListener {
             val newNoteTitle =
-                customDialogEditEmployeeBinding.etNewNoteTitle.text.toString().trim()
+                customDialogEditNoteBinding.etNewNoteTitle.text.toString().trim()
             val newNoteContent =
-                customDialogEditEmployeeBinding.etNewNoteContent.text.toString().trim()
+                customDialogEditNoteBinding.etNewNoteContent.text.toString().trim()
             if ((newNoteTitle.isEmpty() || newNoteContent.isEmpty()) ||
                 (newNoteTitle.matches(Regex("")) || newNoteContent.matches(Regex("")))
             ) {
@@ -109,17 +113,17 @@ class NoteListFragment : ViewBindingFragment<FragmentNoteListBinding>(
 
 
     private fun onDeleteNoteDialog(note: NoteListItem) {
-        val customDialogDeleteFromOurCompanyBinding =
+        val customDialogDeleteNoteBinding =
             CustomDialogDeleteNoteBinding.inflate(
                 layoutInflater
             )
-        customDialogDeleteFromOurCompanyBinding.tvNoteTitle.setText(R.string.delete_note_title)
-        customDialogDeleteFromOurCompanyBinding.tvNoteDescription.setText(R.string.delete_note_description)
+        customDialogDeleteNoteBinding.tvNoteTitle.setText(R.string.delete_note_title)
+        customDialogDeleteNoteBinding.tvNoteDescription.setText(R.string.delete_note_description)
         val customAlertBuilder = AlertDialog.Builder(requireContext())
-            .setView(customDialogDeleteFromOurCompanyBinding.root)
+            .setView(customDialogDeleteNoteBinding.root)
             .create()
-        customDialogDeleteFromOurCompanyBinding.btnDeleteCancel.setOnClickListener { customAlertBuilder.dismiss() }
-        customDialogDeleteFromOurCompanyBinding.btnDeleteOk.setOnClickListener {
+        customDialogDeleteNoteBinding.btnDeleteCancel.setOnClickListener { customAlertBuilder.dismiss() }
+        customDialogDeleteNoteBinding.btnDeleteOk.setOnClickListener {
             note.id.let { it1 -> viewModel.deleteNote(it1) }
             customAlertBuilder.dismiss()
         }
