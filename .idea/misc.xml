@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/PROGRAMS/Notes/app/src/main/res/layout/custom_dialog_add_note.xml" value="0.1" />
+        <entry key="..\:/PROGRAMS/Notes/app/src/main/res/layout/custom_dialog_edit_note.xml" value="0.26358695652173914" />
+        <entry key="..\:/PROGRAMS/Notes/app/src/main/res/layout/fragment_note_details.xml" value="0.26358695652173914" />
         <entry key="..\:/PROGRAMS/notes-test-assignment-android/app/src/main/res/layout/activity_root.xml" value="0.1707193515704154" />
         <entry key="..\:/PROGRAMS/notes-test-assignment-android/app/src/main/res/layout/custom_dialog_add_note.xml" value="0.5" />
         <entry key="..\:/PROGRAMS/notes-test-assignment-android/app/src/main/res/layout/custom_dialog_delete_note.xml" value="0.20969202898550723" />

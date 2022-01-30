@@ -18,7 +18,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="@string/app_name" />
+            app:title="@string/note_details" />
 
         <TextView
             android:id="@+id/tv_name_title_note"
